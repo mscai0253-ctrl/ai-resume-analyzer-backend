@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# PDFs
+*.pdf
+sample_resume/
+
+# temp files
+temp.*
+
+# system files
+Thumbs.db
+.DS_Store
