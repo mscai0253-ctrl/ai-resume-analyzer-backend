@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Resume Analyzer</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    font-family: 'Segoe UI', Arial;
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    margin:0;
+    color:white;
+}
+
+/* Header */
+.header{
+    text-align:center;
+    padding:25px;
+    font-size:28px;
+    font-weight:bold;
+    letter-spacing:1px;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(8px);
+}
+
+/* Main Card */
+.container{
+    display:flex;
+    justify-content:center;
+    padding:40px;
+}
+
+.card{
+    width:700px;
+    background:rgba(255,255,255,0.06);
+    border-radius:16px;
+    padding:30px;
+    box-shadow:0 0 40px rgba(0,0,0,0.4);
+    backdrop-filter:blur(15px);
+}
+
+/* Upload */
+.upload-box{
+    border:2px dashed rgba(255,255,255,0.3);
+    padding:25px;
+    border-radius:12px;
+    text-align:center;
+    transition:0.3s;
+}
+
+.upload-box:hover{
+    border-color:#60a5fa;
+    background:rgba(255,255,255,0.04);
+}
+
+button{
+    margin-top:15px;
+    padding:12px 28px;
+    font-size:15px;
+    background:linear-gradient(135deg,#3b82f6,#6366f1);
+    border:none;
+    border-radius:8px;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px rgba(99,102,241,0.7);
+}
+
+/* Info Box */
+.info{
+    background:rgba(0,0,0,0.3);
+    padding:15px;
+    border-radius:10px;
+    margin-top:20px;
+    line-height:1.6;
+}
+
+/* Skill Tags */
+.section-title{
+    margin-top:25px;
+    font-size:20px;
+    border-bottom:1px solid rgba(255,255,255,0.2);
+    padding-bottom:5px;
+}
+
+.tag{
+    display:inline-block;
+    background:#1d4ed8;
+    padding:6px 12px;
+    border-radius:20px;
+    margin:6px;
+    font-size:13px;
+    animation:fadeIn 0.4s ease;
+}
+
+.other{
+    background:#16a34a;
+}
+
+/* Score Circle */
+.score-container{
+    text-align:center;
+    margin-top:25px;
+}
+
+.circle{
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    background:conic-gradient(#22c55e 0%, #334155 0%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    transition:1s;
+}
+
+.circle span{
+    font-size:28px;
+    font-weight:bold;
+}
+
+/* Animations */
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(5px)}
+    to{opacity:1; transform:translateY(0)}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header"> AI Resume Analyzer</div>
+
+<div class="container">
+<div class="card">
+
+    <div class="upload-box">
+        <input type="file" id="file">
+        <br>
+        <button onclick="upload()">Analyze Resume</button>
+    </div>
+
+    <div class="info" id="info"></div>
+
+    <div class="section-title">Skills</div>
+    <div id="skills"></div>
+
+    <div class="section-title">Other Skills</div>
+    <div id="other"></div>
+
+    <div class="score-container">
+        <div class="circle" id="scorecircle">
+            <span id="scorebar">0%</span>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script>
+
+/* ---- Keep your existing upload() function unchanged ---- */
+
+async function upload(){
+
+    const fileInput = document.getElementById("file");
+    const file = fileInput.files[0];
+
+    if(!file){
+        alert("Please select a resume PDF first");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try{
+        const res = await fetch("http://127.0.0.1:8000/extract", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        document.getElementById("info").innerHTML = `
+            <b>Name:</b> ${data.name || "N/A"} <br>
+            <b>Email:</b> ${data.email || "N/A"} <br>
+            <b>Phone:</b> ${data.phone || "N/A"} <br>
+            <b>Education:</b> ${(data.education || []).join(", ")} <br>
+            <b>Experience:</b> ${(data.experience || []).join(", ")}
+        `;
+
+        document.getElementById("skills").innerHTML =
+            (data.known_skills || []).map(s=>`<span class="tag">${s}</span>`).join("");
+
+        document.getElementById("other").innerHTML =
+            (data.other_skills || []).map(s=>`<span class="tag other">${s}</span>`).join("");
+
+        /* Animated Score Circle */
+        const score = data.match_score || 0;
+        document.getElementById("scorebar").innerText = score + "%";
+        document.getElementById("scorecircle").style.background =
+            `conic-gradient(#22c55e ${score*3.6}deg, #334155 0deg)`;
+
+    }catch(error){
+        alert("Backend not running or connection failed!");
+        console.error(error);
+    }
+}
+
+</script>
+
+</body>
+</html>
