@@ -1,3 +1,19 @@
+import nltk
+import os
+
+# download required NLTK data on server startup
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
+
+import ssl
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+    ssl._create_default_https_context = _create_unverified_https_context
+except:
+    pass
+
+
 import os
 PORT = int(os.environ.get("PORT", 10000))
 
