@@ -25,6 +25,7 @@ from parser import extract_text
 from extractor import extract_skills
 from details import extract_email, extract_phone, extract_name, extract_education, extract_experience
 from scorer import calculate_score
+from tempfile import NamedTemporaryFile
 
 app = FastAPI()
 
@@ -39,14 +40,14 @@ app.add_middleware(
 @app.post("/extract")
 async def extract_resume(file: UploadFile = File(...)):
 
-    temp_file = "temp.pdf"
-    with open(temp_file, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    # create unique temp file
+    with NamedTemporaryFile(delete=False, suffix=".pdf") as temp:
+        shutil.copyfileobj(file.file, temp)
+        temp_path = temp.name
 
-    text = extract_text(temp_file)
+    text = extract_text(temp_path)
 
     known_skills, other_words = extract_skills(text)
-
     education = extract_education(text)
     experience = extract_experience(text)
 
@@ -60,5 +61,4 @@ async def extract_resume(file: UploadFile = File(...)):
         "known_skills": known_skills,
         "other_words": other_words,
         "match_score": score
-        }
-        
+    }
