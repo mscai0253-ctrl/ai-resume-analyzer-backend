@@ -63,6 +63,3 @@ User accounts & history
 
 AI feedback system
 
-👨‍💻 Author
-
-(Name)
