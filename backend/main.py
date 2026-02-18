@@ -18,9 +18,6 @@ try:
 except:
     pass
 
-nltk.download("punkt")
-nltk.download("stopwords")
-nltk.download("averaged_perceptron_tagger")
 
 # ------------------- FASTAPI -------------------
 app = FastAPI()
